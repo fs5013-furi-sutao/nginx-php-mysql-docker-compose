@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  web:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+    volumes:
+      - ./web/conf/default.conf:/etc/nginx/conf.d/default.conf
+  app:
+    build: ./php
+    volumes:
+      - ./php/src:/var/www/
+  mysql:
+    image: mariadb
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASS}
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASS}
+      - TZ=${TZ}
+    ports:
+      - "3306:3306"
+    volumes:
+      # /docker-entrypoint-initdb.d/配下は、
+      # Dockerコンテナが初回起動（初期化）される際に１度だけ実行されるスクリプトなどを配置
+      # *.sh / *.sql / *.sql.gzの拡張子のファイルはファイル名の昇順に実行される。
+      - ./mysql/init:/docker-entrypoint-initdb.d
